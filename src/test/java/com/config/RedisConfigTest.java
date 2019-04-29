@@ -3,6 +3,7 @@ package com.config;
 import com.domain.UserVo;
 import com.service.RedisService;
 import com.util.RedisKeyUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
+@Slf4j
 public class RedisConfigTest {
 
     @Autowired
@@ -45,17 +47,15 @@ public class RedisConfigTest {
     @Resource
     private RedisService redisService;
 
+    /**
+     * 测试生成key名
+     * @throws Exception
+     */
     @Test
     public void testObj() throws Exception{
         UserVo userVo = new UserVo();
-        userVo.setAddress("上海");
-        userVo.setName("测试dfas");
-        userVo.setAge(123);
-        ValueOperations<String,Object> operations = redisTemplate.opsForValue();
-        redisService.expireKey("name",20, TimeUnit.SECONDS);
         String key = RedisKeyUtil.getKey(UserVo.Table,"name",userVo.getName());
-        UserVo vo = (UserVo) operations.get(key);
-        System.out.println(vo);
+        log.info("Result:{}",key);
     }
 
     @Test
@@ -66,7 +66,7 @@ public class RedisConfigTest {
         userVo.setAge(23);
         valueOperations.set("test",userVo);
 
-        System.out.println(valueOperations.get("test"));
+        log.info("Result:{}",valueOperations.get("test"));
     }
 
     @Test
@@ -81,7 +81,7 @@ public class RedisConfigTest {
         auserVo.setAge(23);
         setOperations.add("user:test",userVo,auserVo);
         Set<Object> result = setOperations.members("user:test");
-        System.out.println(result);
+        log.info("Result:{}",result);
     }
 
     @Test
@@ -91,7 +91,7 @@ public class RedisConfigTest {
         userVo.setName("jantent");
         userVo.setAge(23);
         hashOperations.put("hash:user",userVo.hashCode()+"",userVo);
-        System.out.println(hashOperations.get("hash:user",userVo.hashCode()+""));
+        log.info("Result:{}",hashOperations.get("hash:user",userVo.hashCode()+""));
     }
 
     @Test
@@ -100,9 +100,8 @@ public class RedisConfigTest {
         userVo.setAddress("北京");
         userVo.setName("jantent");
         userVo.setAge(23);
-//        listOperations.leftPush("list:user",userVo);
-//        System.out.println(listOperations.leftPop("list:user"));
         // pop之后 值会消失
-        System.out.println(listOperations.leftPop("list:user"));
+        listOperations.leftPush("list:user",userVo);
+        log.info("Result:{}",listOperations.leftPop("list:user"));
     }
 }
